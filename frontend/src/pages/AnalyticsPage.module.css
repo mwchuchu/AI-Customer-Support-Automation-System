@@ -1,0 +1,61 @@
+.page { padding: 32px 36px; animation: fadeIn 0.3s ease; }
+
+.title {
+  font-family: var(--font-display);
+  font-size: 1.6rem; font-weight: 800;
+  letter-spacing: -0.02em; margin-bottom: 24px;
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px; margin-bottom: 24px;
+}
+
+.stat {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px 20px;
+  border-top: 2px solid var(--c);
+}
+
+.statValue {
+  font-family: var(--font-display); font-size: 1.8rem;
+  font-weight: 800; color: var(--c); letter-spacing: -0.02em;
+}
+
+.statLabel {
+  font-size: 0.72rem; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.05em; margin-top: 4px;
+}
+
+.chartsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.card {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 20px;
+}
+
+.cardTitle {
+  font-family: var(--font-mono); font-size: 0.72rem;
+  font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 14px;
+}
+
+.tooltip {
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 14px;
+  font-size: 0.8rem; color: var(--text-secondary);
+}
+
+.tooltipLabel {
+  color: var(--text-muted); font-size: 0.72rem;
+  font-family: var(--font-mono); margin-bottom: 4px;
+}
+
+.loadingGrid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
