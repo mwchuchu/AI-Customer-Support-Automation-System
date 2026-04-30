@@ -26,7 +26,19 @@ async def create_ticket(
     """Submit a new support ticket — triggers the full AI pipeline."""
     logger.info("New ticket submitted", user_id=current_user.id, subject=ticket_data.subject[:40])
     ticket = await process_ticket_pipeline(db, ticket_data, current_user.id)
-    await db.refresh(ticket, ["customer", "ai_responses", "logs"])
+    ticket_id = ticket.id
+
+    result = await db.execute(
+        select(Ticket)
+        .where(Ticket.id == ticket_id)
+        .options(
+            selectinload(Ticket.customer),
+            selectinload(Ticket.assigned_agent),
+            selectinload(Ticket.ai_responses),
+            selectinload(Ticket.logs),
+        )
+    )
+    ticket = result.scalar_one()
     return TicketOut.model_validate(ticket)
 
 
