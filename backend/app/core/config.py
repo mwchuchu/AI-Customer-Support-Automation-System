@@ -15,7 +15,7 @@ class Settings(BaseSettings):
 
     # Gemini AI
     GEMINI_API_KEY: str
-    GEMINI_MODEL: str = "gemini-1.5-flash"  # Free-tier model
+    GEMINI_MODEL: str = "gemini-2.5-flash"  # Latest model
 
     # Security
     SECRET_KEY: str
@@ -31,13 +31,14 @@ class Settings(BaseSettings):
 
     # AI Pipeline Config
     AI_MAX_RETRIES: int = 3
-    AI_CONFIDENCE_THRESHOLD: float = 0.75
+    AI_CONFIDENCE_THRESHOLD: float = 0.6  # Lowered from 0.75 to allow more auto-resolution
     AUTO_RESOLVE_CATEGORIES: List[str] = [
         "billing_inquiry",
         "account_info",
         "password_reset",
         "order_status",
         "faq",
+        "technical_issue",  # Added for simple technical issues
     ]
 
     class Config:

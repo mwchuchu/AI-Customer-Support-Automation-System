@@ -34,8 +34,53 @@ class   GeminiService:
             # Try to find JSON object in text
             match = re.search(r"\{.*\}", cleaned, re.DOTALL)
             if match:
-                return json.loads(match.group())
+                candidate = match.group()
+                try:
+                    return json.loads(candidate)
+                except json.JSONDecodeError:
+                    # Last attempt: normalize single quotes to double quotes for loose JSON
+                    normalized = candidate.replace("'", '"')
+                    return json.loads(normalized)
             raise ValueError(f"Could not parse JSON from response: {text[:200]}")
+
+    def _validate_classification(self, data: dict) -> dict:
+        allowed_categories = {
+            "billing_inquiry",
+            "account_info",
+            "password_reset",
+            "order_status",
+            "technical_issue",
+            "complaint",
+            "feature_request",
+            "faq",
+            "other",
+        }
+        allowed_priorities = {"low", "medium", "high", "critical"}
+        allowed_sentiments = {"positive", "neutral", "negative", "frustrated", "urgent"}
+
+        category = data.get("category")
+        priority = data.get("priority")
+        sentiment = data.get("sentiment")
+        confidence = data.get("confidence_score")
+        summary = data.get("summary")
+        tags = data.get("tags")
+
+        if category not in allowed_categories:
+            raise ValueError(f"Invalid category: {category}")
+        if priority not in allowed_priorities:
+            raise ValueError(f"Invalid priority: {priority}")
+        if sentiment not in allowed_sentiments:
+            raise ValueError(f"Invalid sentiment: {sentiment}")
+        if not isinstance(confidence, (int, float)) or not 0.0 <= float(confidence) <= 1.0:
+            raise ValueError(f"Invalid confidence_score: {confidence}")
+        if not isinstance(summary, str) or not summary.strip():
+            raise ValueError("Invalid summary")
+        if not isinstance(tags, list):
+            raise ValueError("Invalid tags")
+
+        data["confidence_score"] = float(confidence)
+        data["summary"] = summary.strip()
+        return data
 
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
     async def _call_model(self, prompt: str) -> tuple[str, int]:
@@ -77,11 +122,12 @@ Rules:
 - high priority: major features broken, payments failing, account locked
 - medium priority: partial functionality issues, billing questions
 - low priority: general inquiries, feature requests, feedback
-- requires_human: true if sentiment is frustrated/urgent AND issue is complex, or involves legal/financial disputes
+- requires_human: true ONLY if sentiment is frustrated/urgent AND issue involves legal/financial disputes, account security breaches, or complex technical problems requiring code changes. For simple issues like password resets, billing questions, order status, basic technical support, or FAQs, set requires_human to false.
 """
         try:
             text, tokens, latency = await self._call_model(prompt)
             data = self._extract_json(text)
+            data = self._validate_classification(data)
             data["tokens_used"] = tokens
             data["latency_ms"] = latency
             logger.info("Ticket classified", category=data.get("category"), confidence=data.get("confidence_score"))
@@ -135,7 +181,7 @@ Priority: {priority}
 Return ONLY a valid JSON object:
 {{
   "response_text": "<your full customer-facing response here>",
-  "confidence_score": <float 0.0-1.0 — how confident you are this response fully resolves the issue>,
+  "confidence_score": <float 0.0-1.0 — how confident you are this response adequately addresses the customer's immediate needs and provides clear next steps>,
   "resolution_steps": ["<step 1>", "<step 2>"],
   "follow_up_required": <true|false>
 }}
@@ -144,6 +190,8 @@ Guidelines:
 - Start with acknowledgment of the customer's issue
 - Be specific and actionable
 - Provide clear next steps
+- For simple issues (billing, account info, password reset, order status, basic technical support), provide complete resolution steps
+- For complex issues, acknowledge the problem and explain next steps clearly
 - End with an offer for further assistance
 - Keep it under 200 words
 - Do NOT make up specific account details or order numbers
