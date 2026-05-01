@@ -2,6 +2,7 @@
 Gemini AI Service — Core LLM engine for the support pipeline.
 Handles: classification, sentiment analysis, response generation, escalation decisions.
 """
+import asyncio
 import time
 import json
 import re
@@ -18,7 +19,7 @@ logger = get_logger(__name__)
 genai.configure(api_key=settings.GEMINI_API_KEY)
 
 
-class   GeminiService:
+class GeminiService:
     def __init__(self):
         self.model = genai.GenerativeModel(settings.GEMINI_MODEL)
         self.model_name = settings.GEMINI_MODEL
@@ -82,15 +83,33 @@ class   GeminiService:
         data["summary"] = summary.strip()
         return data
 
+    
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
-    async def _call_model(self, prompt: str) -> tuple[str, int]:
-        """Call Gemini model with retry logic. Returns (response_text, tokens_used)."""
+    def _call_model(self, prompt: str) -> tuple[str, int, int]:
+        """Call Gemini model with retry logic. Returns (response_text, tokens_used, latency_ms)."""
         start = time.time()
         response = self.model.generate_content(prompt)
         latency_ms = int((time.time() - start) * 1000)
         text = response.text
         tokens = getattr(response.usage_metadata, "total_token_count", 0)
         return text, tokens, latency_ms
+
+    async def _call_model_async(self, prompt: str) -> tuple[str, int, int]:
+        """Async wrapper for _call_model using thread pool with retry logic."""
+        loop = asyncio.get_event_loop()
+        max_retries = 3
+        wait_time = 2
+        
+        for attempt in range(max_retries):
+            try:
+                return await loop.run_in_executor(None, self._call_model, prompt)
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    logger.error(f"API call failed after {max_retries} attempts", error=str(e))
+                    raise
+                logger.warning(f"API call attempt {attempt + 1} failed, retrying in {wait_time}s", error=str(e))
+                await asyncio.sleep(wait_time)
+                wait_time = min(wait_time * 2, 10)  # exponential backoff, max 10s
 
     async def classify_ticket(self, subject: str, description: str) -> dict:
         """
@@ -125,7 +144,7 @@ Rules:
 - requires_human: true ONLY if sentiment is frustrated/urgent AND issue involves legal/financial disputes, account security breaches, or complex technical problems requiring code changes. For simple issues like password resets, billing questions, order status, basic technical support, or FAQs, set requires_human to false.
 """
         try:
-            text, tokens, latency = await self._call_model(prompt)
+            text, tokens, latency = await self._call_model_async(prompt)
             data = self._extract_json(text)
             data = self._validate_classification(data)
             data["tokens_used"] = tokens
@@ -168,36 +187,36 @@ Rules:
         }
         tone = tone_guide.get(sentiment, "professional")
 
-        prompt = f"""You are a professional customer support agent for a technology company.
+        prompt = f"""You are a professional customer support representative for a technology company.
 
-Write a response to this support ticket. Be {tone}.
+        Write a response to this support ticket. Be {tone}.
 
-TICKET DETAILS:
-Subject: {subject}
-Description: {description}
-Category: {category}
-Priority: {priority}
+        TICKET DETAILS:
+        Subject: {subject}
+        Description: {description}
+        Category: {category}
+        Priority: {priority}
 
-Return ONLY a valid JSON object:
-{{
-  "response_text": "<your full customer-facing response here>",
-  "confidence_score": <float 0.0-1.0 — how confident you are this response adequately addresses the customer's immediate needs and provides clear next steps>,
-  "resolution_steps": ["<step 1>", "<step 2>"],
-  "follow_up_required": <true|false>
-}}
+        Return ONLY a valid JSON object:
+        {{
+        "response_text": "<your full customer-facing response here>",
+        "confidence_score": <float 0.0-1.0 — how confident you are this response adequately addresses the customer's immediate needs and provides clear next steps>,
+        "resolution_steps": ["<step 1>", "<step 2>"],
+        "follow_up_required": <true|false>
+        }}
 
-Guidelines:
-- Start with acknowledgment of the customer's issue
-- Be specific and actionable
-- Provide clear next steps
-- For simple issues (billing, account info, password reset, order status, basic technical support), provide complete resolution steps
-- For complex issues, acknowledge the problem and explain next steps clearly
-- End with an offer for further assistance
-- Keep it under 200 words
-- Do NOT make up specific account details or order numbers
-"""
+        Guidelines:
+        - Start with acknowledgment of the customer's issue
+        - Be specific and actionable
+        - Provide clear next steps
+        - For simple issues (billing, account info, password reset, order status, basic technical support), provide complete resolution steps
+        - For complex issues, acknowledge the problem and explain next steps clearly
+        - End with an offer for further assistance
+        - Keep it under 200 words
+        - Do NOT make up specific account details or order numbers
+        """
         try:
-            text, tokens, latency = await self._call_model(prompt)
+            text, tokens, latency = await self._call_model_async(prompt)
             data = self._extract_json(text)
             data["tokens_used"] = tokens
             data["latency_ms"] = latency
@@ -208,7 +227,7 @@ Guidelines:
             return {
                 "response_text": (
                     "Thank you for contacting us. We have received your request and our team "
-                    "will review it shortly. A support agent will reach out to you within 24 hours."
+                    "will review it shortly. A member of our support team will reach out to you within 24 hours."
                 ),
                 "confidence_score": 0.5,
                 "resolution_steps": [],

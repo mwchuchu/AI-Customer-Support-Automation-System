@@ -1,6 +1,6 @@
 """
 Database models for the AI Support System.
-Tables: users, tickets, ticket_logs, ai_responses, agents
+Tables: users, tickets, ticket_logs, ai_responses
 """
 from datetime import datetime
 from sqlalchemy import (
@@ -16,7 +16,6 @@ from app.db.database import Base
 
 class UserRole(str, enum.Enum):
     CUSTOMER = "customer"
-    AGENT = "agent"
     ADMIN = "admin"
 
 
@@ -73,7 +72,6 @@ class User(Base):
 
     # Relationships
     tickets = relationship("Ticket", back_populates="customer", foreign_keys="Ticket.customer_id")
-    assigned_tickets = relationship("Ticket", back_populates="assigned_agent", foreign_keys="Ticket.assigned_agent_id")
 
 
 # ──────────────────────────────────────────────
@@ -85,7 +83,6 @@ class Ticket(Base):
     id = Column(Integer, primary_key=True, index=True)
     ticket_number = Column(String(20), unique=True, index=True, nullable=False)
     customer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    assigned_agent_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     # Content
     subject = Column(String(500), nullable=False)
@@ -113,7 +110,6 @@ class Ticket(Base):
 
     # Relationships
     customer = relationship("User", back_populates="tickets", foreign_keys=[customer_id])
-    assigned_agent = relationship("User", back_populates="assigned_tickets", foreign_keys=[assigned_agent_id])
     ai_responses = relationship("AIResponse", back_populates="ticket", cascade="all, delete-orphan")
     logs = relationship("TicketLog", back_populates="ticket", cascade="all, delete-orphan")
 
@@ -155,7 +151,7 @@ class TicketLog(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     ticket_id = Column(Integer, ForeignKey("tickets.id"), nullable=False)
-    actor = Column(String(100), nullable=False)  # "system", "ai", "agent", or user email
+    actor = Column(String(100), nullable=False)  # "system", "ai", or user email
     action = Column(String(255), nullable=False)
     details = Column(JSON, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, text
 
 from app.db.database import get_db
-from app.models.models import Ticket, TicketStatus, TicketCategory, TicketPriority, SentimentLabel
+from app.models.models import Ticket, TicketStatus, TicketCategory, TicketPriority, SentimentLabel, UserRole
 from app.schemas.schemas import AnalyticsSummary
 from app.core.security import get_current_user
 from app.core.logging import get_logger
@@ -17,6 +17,9 @@ async def get_analytics(
     db: AsyncSession = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Only admins can access analytics")
+
     # Total counts
     total = (await db.execute(select(func.count(Ticket.id)))).scalar_one()
     open_count = (await db.execute(select(func.count(Ticket.id)).where(Ticket.status == TicketStatus.OPEN))).scalar_one()

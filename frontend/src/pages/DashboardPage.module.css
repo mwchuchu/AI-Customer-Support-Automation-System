@@ -37,19 +37,32 @@
   padding: 20px;
   position: relative;
   overflow: hidden;
-  transition: border-color 0.2s;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .statCard::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 2px;
+  height: 3px;
   background: var(--card-color);
   opacity: 0.7;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.statCard:hover { border-color: var(--card-color); }
+.statCard:hover {
+  border-color: var(--card-color);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 212, 255, 0.1);
+}
+
+.statCard:hover::before {
+  transform: scaleX(1);
+  opacity: 1;
+}
 
 .statIcon {
   color: var(--card-color);
@@ -124,14 +137,35 @@
   border-radius: var(--radius);
   padding: 14px 16px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   gap: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.ticketRow::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .ticketRow:hover {
-  border-color: rgba(0,212,255,0.2);
+  border-color: rgba(0,212,255,0.3);
   background: var(--bg-elevated);
-  transform: translateX(2px);
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.1);
+}
+
+.ticketRow:hover::before {
+  transform: scaleY(1);
 }
 
 .ticketMain {

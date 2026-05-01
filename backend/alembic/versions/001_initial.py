@@ -37,7 +37,6 @@ def upgrade() -> None:
         sa.Column("id", sa.Integer(), primary_key=True, autoincrement=True),
         sa.Column("ticket_number", sa.String(20), nullable=False),
         sa.Column("customer_id", sa.Integer(), sa.ForeignKey("users.id"), nullable=False),
-        sa.Column("assigned_agent_id", sa.Integer(), sa.ForeignKey("users.id"), nullable=True),
         sa.Column("subject", sa.String(500), nullable=False),
         sa.Column("description", sa.Text(), nullable=False),
         sa.Column("category", sa.String(50), server_default="other"),

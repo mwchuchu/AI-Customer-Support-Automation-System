@@ -9,7 +9,7 @@ Every ticket submission triggers a synchronous 3-step Gemini AI pipeline before 
 ## Step 1 — Classification
 
 **Service**: `gemini_service.classify_ticket(subject, description)`  
-**Model**: Gemini 1.5 Flash  
+**Model**: Gemini 2.5 Flash  
 **Output stored in**: `tickets` table + `ai_responses` (step: `classify`)
 
 ### What it determines
@@ -112,7 +112,7 @@ POST /api/tickets/
         │         │
         │         └─ ESCALATE    → ticket.status = "escalated"
         │                          ticket.escalation_reason = "..."
-        │                          log: "Escalated to human agent" + draft_response
+        │                          log: "Escalated for manual review" + draft_response
         │
         └─► Return full Ticket object (with logs + ai_responses eager-loaded)
 ```

@@ -2,7 +2,7 @@
 
 An end-to-end intelligent customer support platform powered by **Gemini AI**, **FastAPI**, **PostgreSQL**, and **React**.
 
-When a customer submits a ticket, a 3-step AI pipeline instantly classifies it, generates a professional response, and either auto-resolves it or escalates it to a human agent — all within seconds.
+When a customer submits a ticket, a 3-step AI pipeline instantly classifies it, generates a professional response, and either auto-resolves it or escalates it for manual review — all within seconds.
 
 ---
 
@@ -22,11 +22,11 @@ Customer Submits Ticket
 │    → Empathetic, contextual customer reply         │
 │                                                    │
 │  Step 3: ESCALATION DECISION                       │
-│    → Auto-resolve OR route to human agent          │
+│    → Auto-resolve OR route to manual review        │
 └──────────────────────────────────────────────────┘
         │
         ├── Auto-resolved → Customer gets instant AI response
-        └── Escalated     → Agent dashboard with full context
+        └── Escalated     → Manual review queue with full context
 ```
 
 ---
@@ -49,7 +49,6 @@ ai-support-system/
 │       │   ├── auth.py             # Register, login, /me
 │       │   ├── tickets.py          # Full ticket CRUD + AI pipeline trigger
 │       │   ├── analytics.py        # Dashboard analytics
-│       │   └── agents.py           # List agents for assignment
 │       ├── core/
 │       │   ├── config.py           # Pydantic settings (reads .env)
 │       │   ├── logging.py          # Structlog structured logging
@@ -158,7 +157,6 @@ cd frontend && npm run dev
 | Role     | Email               | Password      |
 |----------|---------------------|---------------|
 | Admin    | admin@demo.com      | admin123      |
-| Agent    | agent@demo.com      | agent123      |
 | Customer | customer@demo.com   | customer123   |
 
 ---
@@ -181,7 +179,7 @@ Auto-resolves if:
 - Both classification confidence AND response confidence ≥ 0.75
 - No human required flag from classifier
 
-Otherwise: escalated to the agent queue with a reason.
+Otherwise: escalated for manual review with a reason.
 
 ---
 
@@ -223,9 +221,8 @@ Otherwise: escalated to the agent queue with a reason.
 | POST   | `/api/tickets/`         | Submit ticket (triggers AI)    |
 | GET    | `/api/tickets/`         | List tickets (paginated)       |
 | GET    | `/api/tickets/{id}`     | Ticket detail + AI trace       |
-| PATCH  | `/api/tickets/{id}`     | Update status/assignee (agent) |
-| GET    | `/api/analytics/summary`| Dashboard stats                |
-| GET    | `/api/agents/`          | List agents                    |
+| PATCH  | `/api/tickets/{id}`     | Update status or priority      |
+| GET    | `/api/analytics/summary`| Dashboard stats                    |
 | GET    | `/api/health`           | Health check                   |
 
 Full interactive docs at `/api/docs` (Swagger UI).

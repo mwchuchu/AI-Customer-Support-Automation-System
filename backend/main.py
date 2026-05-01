@@ -11,7 +11,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from app.core.config import settings
 from app.core.logging import setup_logging, get_logger
 from app.db.database import engine, Base
-from app.api.routes import tickets, auth, analytics, agents
+from app.api.routes import tickets, auth, analytics
 
 # Setup structured logging
 setup_logging()
@@ -54,7 +54,6 @@ app.add_middleware(
 app.include_router(auth.router,      prefix="/api/auth",      tags=["Authentication"])
 app.include_router(tickets.router,   prefix="/api/tickets",   tags=["Tickets"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["Analytics"])
-app.include_router(agents.router,    prefix="/api/agents",    tags=["AI Agents"])
 
 
 @app.get("/api/health", tags=["Health"])

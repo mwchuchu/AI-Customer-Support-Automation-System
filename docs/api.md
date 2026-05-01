@@ -16,7 +16,7 @@ Create a new user account.
 ```json
 { "email": "user@example.com", "full_name": "Jane Smith", "password": "secret123", "role": "customer" }
 ```
-**Roles**: `customer` | `agent` | `admin`
+**Roles**: `customer` | `admin`
 
 **Response** `201`
 ```json
@@ -56,7 +56,7 @@ Submit a new ticket. Triggers the full AI pipeline synchronously.
 ---
 
 ### GET /tickets/
-List tickets. Customers see only their own; agents/admins see all.
+List tickets. Customers see only their own; admins see all.
 
 **Query params**
 | Param | Values |
@@ -80,11 +80,11 @@ Full ticket detail with eager-loaded `ai_responses` and `logs`.
 ---
 
 ### PATCH /tickets/{id}
-Agents/admins only. Update status, priority, or assigned agent.
+Admins only. Update status or priority.
 
 **Body** (all fields optional)
 ```json
-{ "status": "human_resolved", "priority": "high", "assigned_agent_id": 3 }
+{ "status": "human_resolved", "priority": "high" }
 ```
 
 ---
@@ -92,7 +92,7 @@ Agents/admins only. Update status, priority, or assigned agent.
 ## Analytics
 
 ### GET /analytics/summary
-Agents/admins only.
+Admins only.
 
 **Response**
 ```json
@@ -110,13 +110,6 @@ Agents/admins only.
   "daily_volume": [ { "date": "2024-11-01", "count": 35 }, ... ]
 }
 ```
-
----
-
-## Agents
-
-### GET /agents/
-List all users with role `agent` or `admin`. Used to populate assignment dropdowns.
 
 ---
 

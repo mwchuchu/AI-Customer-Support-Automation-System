@@ -42,16 +42,16 @@
 
 .badges { display: flex; flex-wrap: wrap; gap: 6px; }
 
-.agentControls { display: flex; gap: 10px; flex-shrink: 0; }
+.adminControls { display: flex; gap: 10px; flex-shrink: 0; }
 
-.agentControls select {
+.adminControls select {
   background: var(--bg-surface); border: 1px solid var(--border);
   color: var(--text-secondary); font-size: 0.82rem;
   padding: 8px 12px; border-radius: var(--radius);
   cursor: pointer; font-family: var(--font-body);
   transition: border-color 0.15s;
 }
-.agentControls select:focus { border-color: var(--accent); outline: none; }
+.adminControls select:focus { border-color: var(--accent); outline: none; }
 
 .grid {
   display: grid;

@@ -127,8 +127,8 @@ async def process_ticket_pipeline(
         logger.info("✅ Ticket auto-resolved", ticket_id=ticket.id)
     else:
         ticket.status = TicketStatus.ESCALATED
-        ticket.escalation_reason = decision.get("reason", "Requires human review")
-        await log_action(db, ticket.id, "ai", "Escalated to human agent", {
+        ticket.escalation_reason = decision.get("reason", "Requires manual review")
+        await log_action(db, ticket.id, "ai", "Escalated for manual review", {
             "reason": ticket.escalation_reason,
             "draft_response": response_text,
         })

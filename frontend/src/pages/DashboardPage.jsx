@@ -19,7 +19,7 @@ function StatCard({ icon: Icon, label, value, color, sub }) {
 }
 
 export default function DashboardPage() {
-  const { user, isAgent } = useAuthStore()
+  const { user, isAdmin } = useAuthStore()
   const [analytics, setAnalytics] = useState(null)
   const [recentTickets, setRecentTickets] = useState([])
   const [loading, setLoading] = useState(true)
@@ -33,7 +33,7 @@ export default function DashboardPage() {
         ])
         setRecentTickets(ticketsRes.data.tickets || [])
 
-        if (isAgent()) {
+        if (isAdmin()) {
           const analyticsRes = await analyticsApi.summary()
           setAnalytics(analyticsRes.data)
         }
@@ -54,12 +54,12 @@ export default function DashboardPage() {
             Hello, <span>{user?.full_name?.split(' ')[0]}</span> 👋
           </h1>
           <p className={styles.subtitle}>
-            {isAgent() ? 'Here\'s your support overview' : 'Track and manage your support tickets'}
+            {isAdmin() ? 'Here\'s your overview' : 'Track and manage your support tickets'}
           </p>
         </div>
       </div>
 
-      {isAgent() && analytics && (
+      {isAdmin() && analytics && (
         <div className={styles.statsGrid}>
           <StatCard icon={Ticket}       label="Total Tickets"    value={analytics.total_tickets}   color="accent"  />
           <StatCard icon={Bot}          label="AI Resolved"      value={analytics.ai_resolved}     color="green"   sub={`${analytics.auto_resolution_rate}% auto-rate`} />

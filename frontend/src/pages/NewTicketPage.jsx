@@ -26,7 +26,7 @@ export default function NewTicketPage() {
   }
 
   if (result) {
-    const aiLog = result.logs?.find(l => l.action === 'Auto-resolved by AI' || l.action === 'Escalated to human agent')
+    const aiLog = result.logs?.find(l => l.action === 'Auto-resolved by AI' || l.action === 'Escalated for manual review')
     const aiResponse = aiLog?.details?.response_text || aiLog?.details?.draft_response
 
     return (
@@ -71,7 +71,7 @@ export default function NewTicketPage() {
       <div className={styles.header}>
         <h1 className={styles.title}>New Support Ticket</h1>
         <p className={styles.subtitle}>
-          Our AI processes your request instantly and either resolves it or routes it to the right agent.
+          Our AI processes your request instantly and either resolves it or routes it for manual review.
         </p>
       </div>
 

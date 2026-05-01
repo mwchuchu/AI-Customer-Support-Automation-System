@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Bot, User, Clock, Cpu, AlertTriangle, CheckCircle, Activity } from 'lucide-react'
-import { ticketsApi, agentsApi } from '../services/api'
+import { ticketsApi } from '../services/api'
 import { useAuthStore } from '../store/authStore'
 import Badge from '../components/common/Badge'
 import { formatDistanceToNow, format } from 'date-fns'
@@ -10,21 +10,16 @@ import styles from './TicketDetailPage.module.css'
 export default function TicketDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { isAgent } = useAuthStore()
+  const { isAdmin } = useAuthStore()
   const [ticket, setTicket] = useState(null)
-  const [agents, setAgents] = useState([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(false)
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [ticketRes] = await Promise.all([ticketsApi.get(id)])
+        const ticketRes = await ticketsApi.get(id)
         setTicket(ticketRes.data)
-        if (isAgent()) {
-          const agentsRes = await agentsApi.list()
-          setAgents(agentsRes.data)
-        }
       } finally {
         setLoading(false)
       }
@@ -45,7 +40,7 @@ export default function TicketDetailPage() {
   if (loading) return <div className={styles.loading}><span className={styles.spinner} /></div>
   if (!ticket) return <div className={styles.page}><p>Ticket not found.</p></div>
 
-  const aiGenerateLog = ticket.logs?.find(l => l.action === 'Auto-resolved by AI' || l.action === 'Escalated to human agent')
+  const aiGenerateLog = ticket.logs?.find(l => l.action === 'Auto-resolved by AI' || l.action === 'Escalated for manual review')
   const aiResponseText = aiGenerateLog?.details?.response_text || aiGenerateLog?.details?.draft_response
 
   return (
@@ -67,8 +62,8 @@ export default function TicketDetailPage() {
           </div>
         </div>
 
-        {isAgent() && (
-          <div className={styles.agentControls}>
+        {isAdmin() && (
+          <div className={styles.adminControls}>
             <select
               value={ticket.status}
               onChange={e => updateTicket({ status: e.target.value })}
@@ -79,14 +74,6 @@ export default function TicketDetailPage() {
               <option value="escalated">Escalated</option>
               <option value="human_resolved">Human Resolved</option>
               <option value="closed">Closed</option>
-            </select>
-            <select
-              value={ticket.assigned_agent_id || ''}
-              onChange={e => updateTicket({ assigned_agent_id: e.target.value || null })}
-              disabled={updating}
-            >
-              <option value="">Unassigned</option>
-              {agents.map(a => <option key={a.id} value={a.id}>{a.full_name}</option>)}
             </select>
           </div>
         )}
@@ -155,10 +142,6 @@ export default function TicketDetailPage() {
               <div className={styles.detailRow}>
                 <span>Customer</span>
                 <strong>{ticket.customer?.full_name}</strong>
-              </div>
-              <div className={styles.detailRow}>
-                <span>Assigned To</span>
-                <strong>{ticket.assigned_agent?.full_name || '—'}</strong>
               </div>
               <div className={styles.detailRow}>
                 <span>Confidence</span>

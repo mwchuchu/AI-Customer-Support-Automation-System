@@ -68,7 +68,6 @@ export default function RegisterPage() {
               <User size={15} className={styles.icon} />
               <select value={form.role} onChange={set('role')}>
                 <option value="customer">Customer</option>
-                <option value="agent">Support Agent</option>
                 <option value="admin">Admin</option>
               </select>
             </div>

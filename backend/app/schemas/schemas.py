@@ -50,7 +50,6 @@ class TicketCreate(BaseModel):
 class TicketUpdate(BaseModel):
     status: Optional[TicketStatus] = None
     priority: Optional[TicketPriority] = None
-    assigned_agent_id: Optional[int] = None
 
 
 class AIResponseOut(BaseModel):
@@ -94,7 +93,6 @@ class TicketOut(BaseModel):
     ai_summary: Optional[str]
     suggested_tags: Optional[List[str]]
     customer: UserOut
-    assigned_agent: Optional[UserOut]
     ai_responses: List[AIResponseOut] = []
     logs: List[TicketLogOut] = []
     created_at: datetime

@@ -21,7 +21,6 @@ from app.core.security import hash_password
 
 DEMO_USERS = [
     {"email": "admin@demo.com",    "full_name": "Admin User",    "password": "admin123",  "role": UserRole.ADMIN},
-    {"email": "agent@demo.com",    "full_name": "Sarah Agent",   "password": "agent123",  "role": UserRole.AGENT},
     {"email": "customer@demo.com", "full_name": "John Customer", "password": "customer123","role": UserRole.CUSTOMER},
 ]
 

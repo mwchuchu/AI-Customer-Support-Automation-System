@@ -45,9 +45,4 @@ export const analyticsApi = {
   summary: () => api.get('/analytics/summary'),
 }
 
-// ── Agents ────────────────────────────────────
-export const agentsApi = {
-  list: () => api.get('/agents/'),
-}
-
 export default api

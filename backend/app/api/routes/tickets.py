@@ -33,7 +33,6 @@ async def create_ticket(
         .where(Ticket.id == ticket_id)
         .options(
             selectinload(Ticket.customer),
-            selectinload(Ticket.assigned_agent),
             selectinload(Ticket.ai_responses),
             selectinload(Ticket.logs),
         )
@@ -52,7 +51,7 @@ async def list_tickets(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List tickets. Customers see their own; agents/admins see all."""
+    """List tickets. Customers see their own; admins see all."""
     query = select(Ticket).options(selectinload(Ticket.customer))
 
     if current_user.role == UserRole.CUSTOMER:
@@ -87,7 +86,6 @@ async def get_ticket(
         .where(Ticket.id == ticket_id)
         .options(
             selectinload(Ticket.customer),
-            selectinload(Ticket.assigned_agent),
             selectinload(Ticket.ai_responses),
             selectinload(Ticket.logs),
         )
@@ -107,13 +105,12 @@ async def update_ticket(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    if current_user.role not in [UserRole.AGENT, UserRole.ADMIN]:
-        raise HTTPException(status_code=403, detail="Only agents/admins can update tickets")
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Only admins can update tickets")
 
     result = await db.execute(
         select(Ticket).where(Ticket.id == ticket_id)
-        .options(selectinload(Ticket.customer), selectinload(Ticket.assigned_agent),
-                 selectinload(Ticket.ai_responses), selectinload(Ticket.logs))
+        .options(selectinload(Ticket.customer), selectinload(Ticket.ai_responses), selectinload(Ticket.logs))
     )
     ticket = result.scalar_one_or_none()
     if not ticket:
@@ -123,8 +120,6 @@ async def update_ticket(
         ticket.status = update_data.status
     if update_data.priority:
         ticket.priority = update_data.priority
-    if update_data.assigned_agent_id:
-        ticket.assigned_agent_id = update_data.assigned_agent_id
 
     await db.flush()
     await db.refresh(ticket)

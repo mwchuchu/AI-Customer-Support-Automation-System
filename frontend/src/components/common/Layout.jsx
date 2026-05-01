@@ -6,7 +6,7 @@ import {
 import styles from './Layout.module.css'
 
 export default function Layout() {
-  const { user, logout, isAgent } = useAuthStore()
+  const { user, logout, isAdmin } = useAuthStore()
   const navigate = useNavigate()
 
   const handleLogout = () => { logout(); navigate('/login') }
@@ -14,7 +14,7 @@ export default function Layout() {
   const navItems = [
     { to: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/tickets',    icon: Ticket,           label: 'Tickets' },
-    ...(isAgent() ? [{ to: '/analytics', icon: BarChart3, label: 'Analytics' }] : []),
+    ...(isAdmin() ? [{ to: '/analytics', icon: BarChart3, label: 'Analytics' }] : []),
   ]
 
   return (

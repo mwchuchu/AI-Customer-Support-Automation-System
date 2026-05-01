@@ -10,7 +10,6 @@ export const useAuthStore = create(
       setAuth: (user, token) => set({ user, token }),
       logout: () => set({ user: null, token: null }),
       isAuthenticated: () => !!get().token,
-      isAgent: () => ['agent', 'admin'].includes(get().user?.role),
       isAdmin: () => get().user?.role === 'admin',
     }),
     { name: 'ai-support-auth' }
