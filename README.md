@@ -226,3 +226,6 @@ Otherwise: escalated for manual review with a reason.
 | GET    | `/api/health`           | Health check                   |
 
 Full interactive docs at `/api/docs` (Swagger UI).
+
+## License
+This project is licensed under the MIT License.
