@@ -13,7 +13,7 @@ Customer Submits Ticket
         │
         ▼
 ┌──────────────────────────────────────────────────┐
-│              AI PIPELINE (Gemini 1.5 Flash)       │
+│              AI PIPELINE (Gemini 2.0 Flash)       │
 │                                                    │
 │  Step 1: CLASSIFY                                  │
 │    → Category, Priority, Sentiment, Confidence     │

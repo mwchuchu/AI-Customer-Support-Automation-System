@@ -1,7 +1,3 @@
-"""
-Gemini AI Service — Core LLM engine for the support pipeline.
-Handles: classification, sentiment analysis, response generation, escalation decisions.
-"""
 import asyncio
 import time
 import json
